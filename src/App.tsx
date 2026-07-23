@@ -149,6 +149,7 @@ export default function App() {
         playing={player.playing}
         loading={player.loading}
         error={player.error}
+        track={player.track}
         volume={player.volume}
         favorite={player.current ? favorites.isFavorite(player.current.stationuuid) : false}
         onOpenStation={() => playerStationUrl && navigation.navigate(playerStationUrl)}

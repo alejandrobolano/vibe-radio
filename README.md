@@ -51,15 +51,11 @@ Para desarrollo local, se puede declarar `OPENWEATHER_API_KEY` en `.dev.vars`, a
 
 La estrategia de rastreo de nuevas emisoras e indexación está documentada en `docs/STATION-DISCOVERY-AND-SEO.md`.
 
-## Canción actual y top de la sesión
+## Popularidad y canción actual
 
-Radio Browser no ofrece canción actual, parrilla ni rankings. `src/api/radioBrowser.ts` incluye el registro `metadataEndpoints`, preparado para conectar endpoints públicos de emisoras concretas que respondan JSON con esta forma:
+Radio Browser proporciona los votos acumulados, los clics de las últimas 24 horas y su tendencia. La aplicación diferencia esas métricas, permite votar directamente en Radio Browser y respeta su intervalo de diez minutos por emisora.
 
-```json
-{ "title": "Título", "artist": "Artista", "artwork": "https://..." }
-```
-
-Cuando se configura uno, la app consulta cada 30 segundos y compone el top de canciones reproducidas durante la sesión. Si una emisora no publica estos datos, la UI lo explica y nunca muestra información ficticia.
+Radio Browser no proporciona la canción ni el artista que suenan en directo. El Worker consulta exclusivamente endpoints públicos previamente verificados de emisoras compatibles, normaliza sus respuestas en `/api/now-playing/:stationUuid` y aplica caché y límites de tiempo. La app consulta ese endpoint cada 30 segundos y compone el top de canciones reproducidas durante la sesión. Si una emisora no publica metadatos, la interfaz lo explica y nunca muestra información ficticia.
 
 ## Notas de streaming
 

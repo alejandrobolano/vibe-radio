@@ -1,5 +1,5 @@
 import { ArrowRight, Heart, Pause, Play, ShareNetwork, SpeakerHigh, SpeakerSlash, WarningCircle } from '@phosphor-icons/react'
-import type { Station } from '../types'
+import type { Station, TrackMetadata } from '../types'
 import { DjVisualizer } from './DjVisualizer'
 import { StationLogo } from './StationLogo'
 
@@ -9,6 +9,7 @@ type PlayerProps = {
   playing: boolean
   loading: boolean
   error: string
+  track: TrackMetadata | null
   volume: number
   favorite: boolean
   onOpenStation: () => void
@@ -18,15 +19,20 @@ type PlayerProps = {
   onShare: () => void
 }
 
-export function Player({ station, stationHref, playing, loading, error, volume, favorite, onOpenStation, onToggle, onVolume, onFavorite, onShare }: PlayerProps) {
+export function Player({ station, stationHref, playing, loading, error, track, volume, favorite, onOpenStation, onToggle, onVolume, onFavorite, onShare }: PlayerProps) {
   if (!station) return null
+  const status = error || (loading
+    ? 'Conectando…'
+    : track
+      ? `${track.artist ? `${track.artist} · ` : ''}${track.title}`
+      : playing ? 'En directo' : 'En pausa')
 
   const identity = (
     <>
       <StationLogo src={station.favicon} name={station.name} className="size-12" />
       <div className="min-w-0">
         <p className="truncate text-sm font-semibold">{station.name}</p>
-        <p className={`mt-0.5 truncate text-xs ${error ? 'text-red-400' : 'text-zinc-500'}`}>{error || (loading ? 'Conectando…' : playing ? 'En directo' : 'En pausa')}</p>
+        <p className={`mt-0.5 truncate text-xs ${error ? 'text-red-400' : track ? 'text-lime-300/75' : 'text-zinc-500'}`}>{status}</p>
       </div>
     </>
   )
