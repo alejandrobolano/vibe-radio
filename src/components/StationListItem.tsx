@@ -1,6 +1,6 @@
-import { ArrowRight, CursorClick, Heart, Play } from '@phosphor-icons/react'
+import { ArrowRight, CursorClick, Heart, Play, ThumbsUp } from '@phosphor-icons/react'
 import type { Station } from '../types'
-import { formatClicks, formatCompactClicks, shouldShowClicks } from '../utils/formatClicks'
+import { formatClicks, formatCompactClicks, formatCompactCount, shouldShowClicks } from '../utils/formatClicks'
 import { getStationUrl } from '../utils/stationUrl'
 import { StationLogo } from './StationLogo'
 
@@ -26,7 +26,10 @@ export function StationListItem({ station, favorite, active, onOpen, onPlay, onF
       <a href={stationUrl} onClick={event => { event.preventDefault(); onOpen() }} className="min-w-0 rounded-lg">
         <h3 className="truncate text-sm font-semibold text-zinc-100 sm:text-base">{station.name}</h3>
         <p className="mt-1 truncate text-xs text-zinc-500">{station.state || station.country || 'Radio online'}{station.codec ? ` · ${station.codec}${station.bitrate ? ` ${station.bitrate} kbps` : ''}` : ''}</p>
-        {shouldShowClicks(station.clickcount) && <p title={`${formatClicks(station.clickcount)} clics en las últimas 24 horas`} className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-lime-300/75"><CursorClick size={13} /> {formatCompactClicks(station.clickcount)} clics <span className="font-normal text-zinc-600">· 24 h</span></p>}
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-semibold">
+          {shouldShowClicks(station.clickcount) && <span title={`${formatClicks(station.clickcount)} clics en las últimas 24 horas`} className="flex items-center gap-1.5 text-lime-300/75"><CursorClick size={13} /> {formatCompactClicks(station.clickcount)} clics <span className="font-normal text-zinc-600">· 24 h</span></span>}
+          {station.votes > 0 && <span title={`${formatClicks(station.votes)} votos en Radio Browser`} className="flex items-center gap-1 text-zinc-500"><ThumbsUp size={12} /> {formatCompactCount(station.votes)} votos</span>}
+        </div>
         <div className="mt-2 hidden gap-1.5 overflow-hidden sm:flex">{tags.map(tag => <span key={tag} className="whitespace-nowrap rounded-md bg-white/[.05] px-2 py-1 text-[10px] text-zinc-500">{tag}</span>)}</div>
       </a>
       <div className="flex flex-col items-center sm:flex-row sm:gap-1">

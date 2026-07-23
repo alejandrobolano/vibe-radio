@@ -2,7 +2,6 @@ import type { Country, Region, Station, StationFilters, StationPage, TrackMetada
 import { getStationShortId, slugifyStation } from '../utils/stationUrl'
 import { normalizeCountryList, normalizeRegionList, normalizeStationList, normalizeTrackMetadata } from '../domain/station'
 import { fetchWithTimeout } from '../utils/http'
-import { getSafeHttpUrl } from '../utils/safeUrl'
 
 const API_URL = 'https://de1.api.radio-browser.info/json'
 const headers = { 'User-Agent': 'VibeRadio/1.0' }
@@ -142,12 +141,20 @@ export function registerStationClick(stationUuid: string) {
   void fetchWithTimeout(`${API_URL}/url/${encodeURIComponent(stationUuid)}`, { headers }, 5_000).catch(() => undefined)
 }
 
-const metadataEndpoints: Record<string, string> = {}
+function isSuccessfulVote(value: unknown) {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false
+  const result = value as Record<string, unknown>
+  return result.ok === true || result.ok === 'true'
+}
+
+export async function voteForStation(stationUuid: string, signal?: AbortSignal) {
+  if (stationUuid.startsWith('verified-')) throw new Error('Esta emisora no pertenece al directorio de votación.')
+  const response = await fetchWithTimeout(`${API_URL}/vote/${encodeURIComponent(stationUuid)}`, { headers, signal }, 8_000)
+  if (!response.ok || !isSuccessfulVote(await response.json())) throw new Error('No se pudo registrar el voto ahora mismo.')
+}
 
 export async function getNowPlaying(stationUuid: string, signal?: AbortSignal): Promise<TrackMetadata | null> {
-  const endpoint = getSafeHttpUrl(metadataEndpoints[stationUuid])
-  if (!endpoint) return null
-  const response = await fetchWithTimeout(endpoint, { signal }, 8_000)
+  const response = await fetchWithTimeout(`/api/now-playing/${encodeURIComponent(stationUuid)}`, { signal }, 8_000)
   if (!response.ok) return null
   return normalizeTrackMetadata(await response.json())
 }

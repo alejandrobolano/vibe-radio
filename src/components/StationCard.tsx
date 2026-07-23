@@ -1,6 +1,6 @@
-import { ArrowSquareOut, CursorClick, Heart, Play } from '@phosphor-icons/react'
+import { ArrowSquareOut, CursorClick, Heart, Play, ThumbsUp } from '@phosphor-icons/react'
 import type { Station } from '../types'
-import { formatClicks, formatCompactClicks, shouldShowClicks } from '../utils/formatClicks'
+import { formatClicks, formatCompactClicks, formatCompactCount, shouldShowClicks } from '../utils/formatClicks'
 import { getStationUrl } from '../utils/stationUrl'
 import { StationLogo } from './StationLogo'
 
@@ -27,7 +27,10 @@ export function StationCard({ station, favorite, active, onOpen, onPlay, onFavor
       <div className="min-w-0 py-1 min-[480px]:px-1 min-[480px]:pb-1 min-[480px]:pt-4">
         <h3 className="truncate font-semibold tracking-tight text-zinc-100">{station.name}</h3>
         <p className="mt-1 line-clamp-2 text-xs leading-5 text-zinc-500 min-[480px]:truncate">{station.state || station.country || 'Radio online'}{station.codec ? ` · ${station.codec} ${station.bitrate || ''}` : ''}</p>
-        {shouldShowClicks(station.clickcount) && <p title={`${formatClicks(station.clickcount)} clics en las últimas 24 horas`} className="mt-1.5 flex items-center gap-1.5 text-[11px] font-semibold text-lime-300/80"><CursorClick size={14} /> {formatCompactClicks(station.clickcount)} clics <span className="font-normal text-zinc-600">· 24 h</span></p>}
+        <div className="mt-1.5 flex min-h-4 flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-semibold">
+          {shouldShowClicks(station.clickcount) && <span title={`${formatClicks(station.clickcount)} clics en las últimas 24 horas`} className="flex items-center gap-1.5 text-lime-300/80"><CursorClick size={14} /> {formatCompactClicks(station.clickcount)} clics <span className="font-normal text-zinc-600">· 24 h</span></span>}
+          {station.votes > 0 && <span title={`${formatClicks(station.votes)} votos en Radio Browser`} className="flex items-center gap-1 text-zinc-500"><ThumbsUp size={13} /> {formatCompactCount(station.votes)} votos</span>}
+        </div>
         <div className="mt-2 hidden min-h-6 gap-1.5 overflow-hidden min-[360px]:flex min-[480px]:mt-3">{tags.length ? tags.map(tag => <span key={tag} className="max-w-24 truncate rounded-md bg-white/[.06] px-2 py-1 text-[10px] text-zinc-400">{tag}</span>) : <span className="text-[11px] text-zinc-600">Sin género indicado</span>}</div>
         <a href={stationUrl} onClick={event => { event.preventDefault(); event.stopPropagation(); onOpen() }} className="mt-2 flex min-h-8 items-center gap-1.5 text-xs font-medium text-zinc-500 transition hover:text-lime-300 min-[480px]:mt-3">Ver emisora <ArrowSquareOut size={14} /></a>
       </div>

@@ -1,4 +1,5 @@
 import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, createMomentsHubSeo, createMomentSeo, createStationSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
+import { handleNowPlayingRequest } from './nowPlaying.js'
 import { handleWeatherRequest } from './weather.js'
 
 const WORKERS_DEV_SUFFIX = '.workers.dev'
@@ -118,6 +119,9 @@ export default {
     }
 
     if (url.pathname === '/api/weather') return handleWeatherRequest(request, env)
+
+    const nowPlayingMatch = url.pathname.toLowerCase().match(/^\/api\/now-playing\/([a-z0-9-]{8,64})$/)
+    if (nowPlayingMatch) return handleNowPlayingRequest(request, nowPlayingMatch[1])
 
     if (request.method === 'GET' && url.pathname === '/api/city-guides') {
       const cities = await loadCityIndex(env, request.url)

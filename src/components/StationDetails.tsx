@@ -29,9 +29,12 @@ export function StationDetails({ station, track, history }: StationDetailsProps)
       <section className="mt-7">
         <p className="text-xs font-semibold text-zinc-500">AHORA SUENA</p>
         {track ? (
-          <div className="mt-3">
-            <p className="font-semibold">{track.title}</p>
-            <p className="text-sm text-zinc-400">{track.artist || 'Artista no indicado'}</p>
+          <div className="mt-3 flex items-center gap-3 rounded-xl bg-lime-300/[.045] p-3 ring-1 ring-lime-300/10">
+            {track.artwork && <img src={track.artwork} alt="" loading="lazy" referrerPolicy="no-referrer" className="size-12 shrink-0 rounded-lg object-cover" />}
+            <div className="min-w-0">
+              <p className="truncate font-semibold">{track.title}</p>
+              <p className="truncate text-sm text-zinc-400">{track.artist || 'Artista no indicado'}</p>
+            </div>
           </div>
         ) : (
           <div className="mt-3 flex gap-3 rounded-xl bg-white/[.035] p-3 text-sm text-zinc-400">
