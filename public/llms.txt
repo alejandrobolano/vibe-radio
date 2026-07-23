@@ -1,0 +1,20 @@
+# Vibe Radio
+
+> Vibe Radio es un directorio independiente en español para descubrir y escuchar emisoras de radio online de todo el mundo.
+
+Vibe Radio no transmite ni aloja audio propio. El reproductor conecta con flujos públicos facilitados por las emisoras o por Radio Browser. La disponibilidad, programación y metadatos musicales dependen de cada emisora y pueden cambiar.
+
+## Contenido principal
+
+- [Directorio de emisoras](https://viberadio.net/): búsqueda y filtros por nombre, género, continente, país y región.
+- [Acerca de Vibe Radio](https://viberadio.net/acerca-de): responsable y finalidad del proyecto.
+- [Metodología y fuentes](https://viberadio.net/metodologia): obtención, normalización y actualización del catálogo.
+- [Sitemap](https://viberadio.net/sitemap.xml): índice completo de páginas públicas por país.
+
+## Fuentes y atribución
+
+El catálogo procede principalmente de Radio Browser y se complementa con emisoras verificadas manualmente. Vibe Radio fue creado por Alejandro Bolaño: https://alejandrobolano.com
+
+## Criterios de uso
+
+Las páginas de emisora contienen el nombre, país, región, idioma, géneros, enlace oficial cuando está disponible y acceso al stream público. Para datos actuales sobre una emisora concreta, se recomienda contrastar también su sitio oficial.

@@ -1,0 +1,11 @@
+node_modules
+dist
+.vite
+.wrangler
+.pnpm-store
+.dev.vars*
+.env*
+*.local
+*.log
+coverage
+worker-configuration.d.ts
