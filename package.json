@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
-    "@tailwindcss/vite": "^4.1.14",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "tailwindcss": "^4.1.14",
     "vite": "^7.1.7"
   },
@@ -26,11 +26,11 @@
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.22",
+    "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^16.4.0",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.44.1",
+    "typescript-eslint": "^8.65.0",
     "vitest": "^3.2.4",
-    "wrangler": "4.114.0"
+    "wrangler": "4.115.0"
   }
 }
