@@ -291,6 +291,7 @@ await writeUrlset('sitemap-core.xml', [
   { url: `${siteUrl}/metodologia`, lastmod: today },
   { url: `${siteUrl}/ciudades`, lastmod: today },
   { url: `${siteUrl}/momentos`, lastmod: today },
+  { url: `${siteUrl}/camaras/badalona`, lastmod: today },
   ...sortedCountries.map(country => ({ url: `${siteUrl}/pais/${country.slug}`, lastmod: today })),
 ])
 await writeUrlset('sitemap-cities.xml', citySummaries.map(city => ({ url: `${siteUrl}/pais/${city.countrySlug}/${city.slug}`, lastmod: today })))
@@ -320,4 +321,4 @@ const sitemapIndex = sitemapFiles.map(filename => `  <sitemap><loc>${escapeXml(`
 await writeFile('public/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapIndex}\n</sitemapindex>\n`)
 await writeFile('public/robots.txt', `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: OAI-SearchBot\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: ChatGPT-User\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: Claude-SearchBot\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: Claude-User\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: PerplexityBot\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: Google-Extended\nAllow: /\nDisallow: /api/\nDisallow: /seo/\n\nUser-agent: GPTBot\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`)
 await writeFile('public/seo/catalog.json', JSON.stringify({ generatedAt, stationCount: stations.length, countryCount: countries.size, cityCount: citySummaries.length, sitemapCount: sitemapFiles.length }))
-console.log(`Generadas ${stations.length + countries.size + citySummaries.length + momentSummaries.length + 5} URLs en ${sitemapFiles.length} sitemaps y ${shardCount} fragmentos SEO.`)
+console.log(`Generadas ${stations.length + countries.size + citySummaries.length + momentSummaries.length + 6} URLs en ${sitemapFiles.length} sitemaps y ${shardCount} fragmentos SEO.`)

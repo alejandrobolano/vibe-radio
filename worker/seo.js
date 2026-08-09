@@ -229,6 +229,24 @@ export function createMomentsHubSeo(moments) {
   return { canonicalUrl, title, description, jsonLd: serializeJsonLd(jsonLd), initialContent: `<main><article><h1>Radio para cada momento</h1><p>${description}</p><ul>${links}</ul></article></main>` }
 }
 
+export function createWebcamsSeo() {
+  const canonicalUrl = `${PRODUCTION_ORIGIN}/camaras/badalona`
+  const title = 'Cámaras de Badalona en directo | Vibe Radio'
+  const description = 'Consulta cámaras y vistas actualizadas de Badalona mientras sigues escuchando tu emisora favorita en Vibe Radio.'
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      { '@type': 'CollectionPage', '@id': `${canonicalUrl}#page`, name: title, url: canonicalUrl, description, inLanguage: 'es', about: { '@type': 'City', name: 'Badalona', containedInPlace: { '@type': 'Country', name: 'España' } } },
+      { '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Emisoras', item: `${PRODUCTION_ORIGIN}/` },
+        { '@type': 'ListItem', position: 2, name: 'Cámaras de Badalona', item: canonicalUrl },
+      ] },
+    ],
+  }
+  const initialContent = `<main><article><p>Badalona ahora</p><h1>Cámaras de Badalona</h1><p>${escapeHtml(description)}</p><h2>Vistas actualizadas cerca de Badalona</h2><p>Selecciona una cámara para observar diferentes zonas sin interrumpir la emisora que estés escuchando. Las imágenes proceden de Windy y se renuevan periódicamente.</p></article></main>`
+  return { canonicalUrl, title, description, jsonLd: serializeJsonLd(jsonLd), initialContent }
+}
+
 export function createInfoSeo(pathname) {
   const pages = {
     '/acerca-de': {

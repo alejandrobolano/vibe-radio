@@ -23,10 +23,15 @@
   },
   "env": {
     "test": {
-      "name": "dev",
+      "name": "viberadio-dev",
       "workers_dev": true,
       "preview_urls": true,
-      "routes": []
+      "routes": [
+        {
+          "pattern": "dev.viberadio.net",
+          "custom_domain": true
+        }
+      ]
     }
   }
 }

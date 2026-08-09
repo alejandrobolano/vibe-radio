@@ -1,10 +1,12 @@
-import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, createMomentsHubSeo, createMomentSeo, createStationSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
+import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, createMomentsHubSeo, createMomentSeo, createStationSeo, createWebcamsSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
 import { handleNowPlayingRequest } from './nowPlaying.js'
 import { handleWeatherRequest } from './weather.js'
+import { handleBadalonaWebcamsRequest } from './webcams.js'
 
 const WORKERS_DEV_SUFFIX = '.workers.dev'
 const PRODUCTION_HOSTNAME = 'viberadio.net'
 const WWW_HOSTNAME = `www.${PRODUCTION_HOSTNAME}`
+const DEVELOPMENT_HOSTNAME = `dev.${PRODUCTION_HOSTNAME}`
 
 function setMetaContent(content) {
   return { element: element => element.setAttribute('content', content) }
@@ -104,6 +106,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url)
     const hostname = url.hostname
+    const isDevelopment = hostname === DEVELOPMENT_HOSTNAME || hostname.endsWith(WORKERS_DEV_SUFFIX)
 
     if (hostname === WWW_HOSTNAME) {
       const destination = new URL(url.pathname + url.search, `https://${PRODUCTION_HOSTNAME}`)
@@ -119,6 +122,8 @@ export default {
     }
 
     if (url.pathname === '/api/weather') return handleWeatherRequest(request, env)
+
+    if (url.pathname.replace(/\/$/, '') === '/api/webcams/badalona') return handleBadalonaWebcamsRequest(request, env)
 
     const nowPlayingMatch = url.pathname.toLowerCase().match(/^\/api\/now-playing\/([a-z0-9-]{8,64})$/)
     if (nowPlayingMatch) return handleNowPlayingRequest(request, nowPlayingMatch[1])
@@ -155,7 +160,7 @@ export default {
       ])
       const notFoundResponse = new Response(response.body, { status: 404, headers: response.headers })
       const stationResponse = station ? renderStationPage(response, station) : applyRobotsHeader(notFoundResponse, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(stationResponse, 'noindex, nofollow') : stationResponse
+      return isDevelopment ? applyRobotsHeader(stationResponse, 'noindex, nofollow') : stationResponse
     }
 
     const cityRoute = request.method === 'GET' ? parseCityRoute(url.pathname) : null
@@ -163,7 +168,7 @@ export default {
       const [response, city] = await Promise.all([env.ASSETS.fetch(request), loadCity(env, request.url, cityRoute)])
       const notFoundResponse = new Response(response.body, { status: 404, headers: response.headers })
       const cityResponse = city ? renderSeoPage(response, createCitySeo(city), 'data-city-schema="true"') : applyRobotsHeader(notFoundResponse, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(cityResponse, 'noindex, nofollow') : cityResponse
+      return isDevelopment ? applyRobotsHeader(cityResponse, 'noindex, nofollow') : cityResponse
     }
 
     const momentSlug = request.method === 'GET' ? parseMomentRoute(url.pathname) : null
@@ -171,7 +176,7 @@ export default {
       const [response, moment] = await Promise.all([env.ASSETS.fetch(request), loadMoment(env, request.url, momentSlug)])
       const notFoundResponse = new Response(response.body, { status: 404, headers: response.headers })
       const momentResponse = moment ? renderSeoPage(response, createMomentSeo(moment), 'data-moment-schema="true"') : applyRobotsHeader(notFoundResponse, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(momentResponse, 'noindex, nofollow') : momentResponse
+      return isDevelopment ? applyRobotsHeader(momentResponse, 'noindex, nofollow') : momentResponse
     }
 
     const countrySlug = request.method === 'GET' ? parseCountryRoute(url.pathname) : null
@@ -179,28 +184,33 @@ export default {
       const [response, country] = await Promise.all([env.ASSETS.fetch(request), loadCountry(env, request.url, countrySlug)])
       const notFoundResponse = new Response(response.body, { status: 404, headers: response.headers })
       const countryResponse = country ? renderSeoPage(response, createCountrySeo(country), 'data-country-schema="true"') : applyRobotsHeader(notFoundResponse, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(countryResponse, 'noindex, nofollow') : countryResponse
+      return isDevelopment ? applyRobotsHeader(countryResponse, 'noindex, nofollow') : countryResponse
     }
 
     const infoSeo = request.method === 'GET' ? createInfoSeo(url.pathname.replace(/\/$/, '')) : null
     if (infoSeo) {
       const response = renderSeoPage(await env.ASSETS.fetch(request), infoSeo, 'data-info-schema="true"')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(response, 'noindex, nofollow') : response
+      return isDevelopment ? applyRobotsHeader(response, 'noindex, nofollow') : response
     }
 
     if (request.method === 'GET' && url.pathname.replace(/\/$/, '') === '/ciudades') {
       const [response, cities] = await Promise.all([env.ASSETS.fetch(request), loadCityIndex(env, request.url)])
       const cityHubResponse = Array.isArray(cities) ? renderSeoPage(response, createCityHubSeo(cities), 'data-city-hub-schema="true"') : applyRobotsHeader(response, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(cityHubResponse, 'noindex, nofollow') : cityHubResponse
+      return isDevelopment ? applyRobotsHeader(cityHubResponse, 'noindex, nofollow') : cityHubResponse
     }
 
     if (request.method === 'GET' && url.pathname.replace(/\/$/, '') === '/momentos') {
       const [response, moments] = await Promise.all([env.ASSETS.fetch(request), loadMomentIndex(env, request.url)])
       const momentsHubResponse = Array.isArray(moments) ? renderSeoPage(response, createMomentsHubSeo(moments), 'data-moments-hub-schema="true"') : applyRobotsHeader(response, 'noindex, follow')
-      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(momentsHubResponse, 'noindex, nofollow') : momentsHubResponse
+      return isDevelopment ? applyRobotsHeader(momentsHubResponse, 'noindex, nofollow') : momentsHubResponse
+    }
+
+    if (request.method === 'GET' && url.pathname.replace(/\/$/, '') === '/camaras/badalona') {
+      const response = renderSeoPage(await env.ASSETS.fetch(request), createWebcamsSeo(), 'data-webcams-schema="true"')
+      return isDevelopment ? applyRobotsHeader(response, 'noindex, nofollow') : response
     }
 
     const response = await env.ASSETS.fetch(request)
-    return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(response, 'noindex, nofollow') : response
+    return isDevelopment ? applyRobotsHeader(response, 'noindex, nofollow') : response
   },
 }
