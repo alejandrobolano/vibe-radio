@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createCitySeo, createCountrySeo, createMomentSeo, createStationSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
+import { createCitySeo, createCountrySeo, createMomentSeo, createStationSeo, createWebcamsSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
 
 const station = {
   id: '7a3a3989',
@@ -59,5 +59,13 @@ describe('Worker station SEO', () => {
     expect(seo.canonicalUrl).toBe('https://viberadio.net/momento/trabajar')
     expect(seo.jsonLd).toContain('ItemList')
     expect(seo.initialContent).toContain('RMC FR')
+  })
+
+  it('creates indexable metadata for the Badalona webcams page', () => {
+    const seo = createWebcamsSeo()
+    expect(seo.canonicalUrl).toBe('https://viberadio.net/camaras/badalona')
+    expect(seo.jsonLd).toContain('CollectionPage')
+    expect(seo.jsonLd).toContain('Badalona')
+    expect(seo.initialContent).toContain('Cámaras de Badalona')
   })
 })

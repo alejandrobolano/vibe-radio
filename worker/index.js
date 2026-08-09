@@ -1,6 +1,7 @@
-import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, createMomentsHubSeo, createMomentSeo, createStationSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
+import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, createMomentsHubSeo, createMomentSeo, createStationSeo, createWebcamsSeo, findStation, parseCityRoute, parseCountryRoute, parseMomentRoute, parseStationRoute } from './seo.js'
 import { handleNowPlayingRequest } from './nowPlaying.js'
 import { handleWeatherRequest } from './weather.js'
+import { handleBadalonaWebcamsRequest } from './webcams.js'
 
 const WORKERS_DEV_SUFFIX = '.workers.dev'
 const PRODUCTION_HOSTNAME = 'viberadio.net'
@@ -120,6 +121,8 @@ export default {
 
     if (url.pathname === '/api/weather') return handleWeatherRequest(request, env)
 
+    if (url.pathname.replace(/\/$/, '') === '/api/webcams/badalona') return handleBadalonaWebcamsRequest(request, env)
+
     const nowPlayingMatch = url.pathname.toLowerCase().match(/^\/api\/now-playing\/([a-z0-9-]{8,64})$/)
     if (nowPlayingMatch) return handleNowPlayingRequest(request, nowPlayingMatch[1])
 
@@ -198,6 +201,11 @@ export default {
       const [response, moments] = await Promise.all([env.ASSETS.fetch(request), loadMomentIndex(env, request.url)])
       const momentsHubResponse = Array.isArray(moments) ? renderSeoPage(response, createMomentsHubSeo(moments), 'data-moments-hub-schema="true"') : applyRobotsHeader(response, 'noindex, follow')
       return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(momentsHubResponse, 'noindex, nofollow') : momentsHubResponse
+    }
+
+    if (request.method === 'GET' && url.pathname.replace(/\/$/, '') === '/camaras/badalona') {
+      const response = renderSeoPage(await env.ASSETS.fetch(request), createWebcamsSeo(), 'data-webcams-schema="true"')
+      return hostname.endsWith(WORKERS_DEV_SUFFIX) ? applyRobotsHeader(response, 'noindex, nofollow') : response
     }
 
     const response = await env.ASSETS.fetch(request)

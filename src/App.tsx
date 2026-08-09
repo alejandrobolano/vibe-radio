@@ -15,6 +15,7 @@ import { CityPage } from './components/CityPage'
 import { InfoPage } from './components/InfoPage'
 import { MomentPage } from './components/MomentPage'
 import { MomentsHubPage } from './components/MomentsHubPage'
+import { BadalonaWebcamsPage } from './components/BadalonaWebcamsPage'
 import { isInfoPath } from './utils/infoPage'
 import { StationResults } from './components/StationResults'
 import { VisitorContext } from './components/VisitorContext'
@@ -33,6 +34,7 @@ import { getStationRouteFromPath, getStationUrl, stationRouteMatchesStation } fr
 import { getCountrySlugFromPath } from './utils/countryUrl'
 import { getCityRouteFromPath } from './utils/cityUrl'
 import { getMomentSlugFromPath, isMomentsHubPath } from './utils/momentUrl'
+import { BADALONA_WEBCAMS_PATH } from './domain/webcam'
 
 type DirectoryAppProps = {
   player: RadioPlayerController
@@ -75,7 +77,7 @@ function DirectoryApp({ player, favorites, sleepTimer, navigate }: DirectoryAppP
 
   return (
     <div className={`flex min-h-[100dvh] flex-col bg-[#090a0b] text-zinc-100 ${player.current ? 'pb-28' : ''}`}>
-      <DirectoryHeader view={view} favoriteCount={favorites.favorites.length} sleepTimer={sleepTimer} onHome={goHome} onViewChange={setView} />
+      <DirectoryHeader view={view} favoriteCount={favorites.favorites.length} sleepTimer={sleepTimer} onHome={goHome} onViewChange={setView} navigate={navigate} />
       <main id="top" className="mx-auto w-full max-w-[1400px] flex-1 px-4 md:px-8">
         {view === 'discover' && <VisitorContext />}
         <DirectoryHero query={directory.query} loading={directory.loading} onQueryChange={directory.setQuery} onSearch={search} />
@@ -121,6 +123,7 @@ export default function App() {
   const momentSlug = useMemo(() => getMomentSlugFromPath(navigation.location.pathname), [navigation.location.pathname])
   const momentsHub = isMomentsHubPath(navigation.location.pathname)
   const citiesHub = navigation.location.pathname === '/ciudades' || navigation.location.pathname === '/ciudades/'
+  const badalonaWebcams = navigation.location.pathname.replace(/\/$/, '') === BADALONA_WEBCAMS_PATH
   const infoPath = isInfoPath(navigation.location.pathname) ? navigation.location.pathname : null
   const playerStationUrl = player.current ? getStationUrl(player.current) : null
   const playerStationHref = player.current && !stationRouteMatchesStation(stationRoute, player.current) ? playerStationUrl : null
@@ -140,6 +143,8 @@ export default function App() {
           ? <MomentsHubPage player={player} sleepTimer={sleepTimer} navigate={navigation.navigate} />
         : citiesHub
           ? <CityHubPage player={player} sleepTimer={sleepTimer} navigate={navigation.navigate} />
+        : badalonaWebcams
+          ? <BadalonaWebcamsPage player={player} sleepTimer={sleepTimer} navigate={navigation.navigate} />
         : infoPath
           ? <InfoPage pathname={infoPath} player={player} sleepTimer={sleepTimer} navigate={navigation.navigate} />
         : <DirectoryApp player={player} favorites={favorites} sleepTimer={sleepTimer} navigate={navigation.navigate} />}

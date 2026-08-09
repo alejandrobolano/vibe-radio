@@ -51,6 +51,12 @@ Para desarrollo local, se puede declarar `OPENWEATHER_API_KEY` en `.dev.vars`, a
 
 La estrategia de rastreo de nuevas emisoras e indexación está documentada en `docs/STATION-DISCOVERY-AND-SEO.md`.
 
+## Cámaras de Badalona
+
+La ruta `/camaras/badalona` consulta Windy Webcams API V3 mediante el Worker para no exponer la credencial al navegador. La integración requiere el secreto `WINDY_API_KEY` en los entornos `development` y `production` de GitHub. El workflow sincroniza ese valor con el secreto homónimo del Worker antes de cada despliegue.
+
+Las URLs firmadas de las imágenes se renuevan cada ocho minutos, antes de su caducidad en el plan gratuito. La interfaz enlaza cada imagen con Windy y mantiene su atribución conforme a los términos del proveedor.
+
 ## Popularidad y canción actual
 
 Radio Browser proporciona los votos acumulados, los clics de las últimas 24 horas y su tendencia. La aplicación diferencia esas métricas, permite votar directamente en Radio Browser y respeta su intervalo de diez minutos por emisora.

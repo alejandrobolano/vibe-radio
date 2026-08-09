@@ -1,8 +1,9 @@
-import { ArrowLeft, Broadcast } from '@phosphor-icons/react'
+import { ArrowLeft, Broadcast, Camera } from '@phosphor-icons/react'
 import type { MouseEvent } from 'react'
 import type { Navigate } from '../hooks/useAppNavigation'
 import type { SleepTimerController } from '../hooks/useSleepTimer'
 import { SleepTimerControl } from './SleepTimerControl'
+import { BADALONA_WEBCAMS_PATH } from '../domain/webcam'
 
 type ContentPageHeaderProps = {
   sleepTimer: SleepTimerController
@@ -25,6 +26,7 @@ export function ContentPageHeader({ sleepTimer, navigate, backHref = '/', backLa
           <span>VIBE<span className="text-lime-300">RADIO</span></span>
         </a>
         <div className="flex items-center gap-2">
+          <a href={BADALONA_WEBCAMS_PATH} onClick={event => go(event, BADALONA_WEBCAMS_PATH)} className="flex h-10 items-center gap-2 rounded-xl px-2.5 text-sm text-zinc-500 transition hover:bg-white/[.04] hover:text-white sm:px-3"><Camera size={17} /><span className="hidden md:inline">Cámaras</span></a>
           <SleepTimerControl timer={sleepTimer} />
           <a href={backHref} onClick={event => go(event, backHref)} className="flex min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-sm text-zinc-400 transition hover:text-white"><ArrowLeft size={17} /><span className="truncate">{backLabel}</span></a>
         </div>
