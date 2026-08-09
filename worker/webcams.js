@@ -29,13 +29,29 @@ function safeUrl(value) {
   }
 }
 
-function imageUrl(images) {
+function safeWindyUrl(value) {
+  const url = safeUrl(value)
+  if (!url) return ''
+  const hostname = new URL(url).hostname.toLowerCase()
+  return hostname === 'windy.com' || hostname.endsWith('.windy.com') ? url : ''
+}
+
+function image(images, sizes) {
   const source = record(images)
+  const dimensions = record(sizes)
   for (const key of ['full', 'player', 'preview', 'thumbnail', 'icon']) {
     const url = safeUrl(source[key])
-    if (url) return url
+    if (url) {
+      const size = record(dimensions[key])
+      return { url, width: number(size.width), height: number(size.height) }
+    }
   }
-  return ''
+  return { url: '', width: null, height: null }
+}
+
+function playerUrls(value) {
+  const player = record(value)
+  return Object.fromEntries(['live', 'day', 'month', 'year', 'lifetime'].map(period => [period, safeWindyUrl(player[period])]))
 }
 
 function normalizeWebcam(value) {
@@ -44,8 +60,9 @@ function normalizeWebcam(value) {
   const location = record(webcam.location)
   const urls = record(webcam.urls)
   const id = number(webcam.webcamId)
-  const currentImage = imageUrl(images.current)
-  if (id === null || !text(webcam.title) || !currentImage) return null
+  const currentImage = image(images.current, images.sizes)
+  const daylightImage = image(images.daylight, images.sizes)
+  if (id === null || !text(webcam.title) || !currentImage.url) return null
 
   return {
     id,
@@ -53,17 +70,26 @@ function normalizeWebcam(value) {
     status: webcam.status === 'inactive' ? 'inactive' : 'active',
     viewCount: number(webcam.viewCount) || 0,
     lastUpdatedOn: text(webcam.lastUpdatedOn, 40),
-    imageUrl: currentImage,
-    daylightImageUrl: imageUrl(images.daylight) || currentImage,
+    imageUrl: currentImage.url,
+    daylightImageUrl: daylightImage.url || currentImage.url,
+    imageWidth: currentImage.width,
+    imageHeight: currentImage.height,
+    clusterSize: number(webcam.clusterSize) || 1,
     location: {
       city: text(location.city, 100),
       region: text(location.region, 100),
+      regionCode: text(location.regionCode ?? location.region_code, 20),
       country: text(location.country, 100),
+      countryCode: text(location.countryCode ?? location.country_code, 10),
+      continent: text(location.continent, 100),
+      continentCode: text(location.continentCode ?? location.continent_code, 10),
       latitude: number(location.latitude),
       longitude: number(location.longitude),
     },
     categories: Array.isArray(webcam.categories) ? webcam.categories.map(item => text(record(item).name, 50)).filter(Boolean).slice(0, 6) : [],
-    detailUrl: safeUrl(urls.detail),
+    player: playerUrls(webcam.player),
+    detailUrl: safeWindyUrl(urls.detail),
+    editUrl: safeWindyUrl(urls.edit),
   }
 }
 

@@ -14,9 +14,11 @@ describe('Badalona webcams endpoint', () => {
         viewCount: 42,
         lastUpdatedOn: '2026-08-09T12:00:00.000Z',
         categories: [{ name: 'Puerto' }],
-        images: { current: { preview: 'https://images.windy.com/current.jpg' }, daylight: { thumbnail: 'https://images.windy.com/daylight.jpg' } },
+        clusterSize: 1,
+        images: { current: { preview: 'https://images.windy.com/current.jpg' }, daylight: { thumbnail: 'https://images.windy.com/daylight.jpg' }, sizes: { preview: { width: 640, height: 360 } } },
         location: { city: 'Badalona', region: 'Cataluña', country: 'España', latitude: 41.45, longitude: 2.2474 },
-        urls: { detail: 'https://www.windy.com/webcams/123' },
+        player: { day: 'https://webcams.windy.com/webcams/public/embed/player/123/day', live: 'https://malicious.example/live' },
+        urls: { detail: 'https://www.windy.com/webcams/123', edit: 'https://www.windy.com/webcams/123/edit' },
       }],
     }), { headers: { 'content-type': 'application/json' } }))
 
@@ -24,7 +26,14 @@ describe('Badalona webcams endpoint', () => {
     const payload = await response.json()
 
     expect(response.status).toBe(200)
-    expect(payload.webcams[0]).toMatchObject({ id: 123, title: 'Port de Badalona', imageUrl: 'https://images.windy.com/current.jpg' })
+    expect(payload.webcams[0]).toMatchObject({
+      id: 123,
+      title: 'Port de Badalona',
+      imageUrl: 'https://images.windy.com/current.jpg',
+      imageWidth: 640,
+      imageHeight: 360,
+      player: { day: 'https://webcams.windy.com/webcams/public/embed/player/123/day', live: '' },
+    })
     expect(JSON.stringify(payload)).not.toContain('secret-key')
     expect(fetchMock.mock.calls[0][1].headers['x-windy-api-key']).toBe('secret-key')
     fetchMock.mockRestore()
