@@ -5,6 +5,7 @@ import { BADALONA_WEBCAMS_PATH, WEBCAM_REFRESH_INTERVAL, type Webcam } from '../
 import type { Navigate } from '../hooks/useAppNavigation'
 import type { RadioPlayerController } from '../hooks/useRadioPlayer'
 import type { SleepTimerController } from '../hooks/useSleepTimer'
+import { useWebcamFrame } from '../hooks/useWebcamFrame'
 import { setCanonicalUrl, setMetaTag } from '../utils/seo'
 import { ContentPageHeader } from './ContentPageHeader'
 import { Footer } from './Footer'
@@ -21,8 +22,9 @@ function formatUpdatedAt(value: string) {
   return `Actualizada ${new Intl.RelativeTimeFormat('es', { numeric: 'auto' }).format(Math.round((date.getTime() - Date.now()) / 60_000), 'minute')}`
 }
 
-function CameraViewer({ webcam, refreshedAt }: { webcam: Webcam; refreshedAt: string }) {
+function CameraViewer({ webcam }: { webcam: Webcam }) {
   const [imageFailed, setImageFailed] = useState(false)
+  const { frameUrl, frameRevision, checking, lastChangedAt } = useWebcamFrame(webcam.imageUrl)
 
   useEffect(() => setImageFailed(false), [webcam.id, webcam.imageUrl])
 
@@ -31,7 +33,7 @@ function CameraViewer({ webcam, refreshedAt }: { webcam: Webcam; refreshedAt: st
       <div className="relative aspect-video min-h-64 overflow-hidden bg-zinc-900 sm:min-h-96">
         {!imageFailed ? (
           <a href={webcam.detailUrl || 'https://www.windy.com/webcams'} target="_blank" rel="noopener noreferrer" aria-label={`Ver ${webcam.title} en Windy`} className="grid size-full place-items-center">
-            <img key={`${webcam.id}-${refreshedAt}`} src={webcam.imageUrl} onError={() => setImageFailed(true)} alt={`Vista actual de ${webcam.title}, cerca de Badalona`} className="webcam-live-image max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
+            <img key={`${webcam.id}-${frameRevision}`} src={frameUrl} onError={() => setImageFailed(true)} alt={`Vista actual de ${webcam.title}, cerca de Badalona`} className="webcam-live-image max-h-full max-w-full object-contain" referrerPolicy="no-referrer" />
             <span className="webcam-scanline" aria-hidden="true" />
           </a>
         ) : (
@@ -48,7 +50,7 @@ function CameraViewer({ webcam, refreshedAt }: { webcam: Webcam; refreshedAt: st
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-xs text-zinc-500">
         <span className="flex items-center gap-1.5"><Eye size={15} /> {new Intl.NumberFormat('es-ES').format(webcam.viewCount)} visualizaciones en Windy</span>
-        <span>Imagen con movimiento visual; no es vídeo en directo</span>
+        <span className="flex items-center gap-1.5"><ArrowsClockwise size={14} className={checking ? 'animate-spin text-lime-300' : ''} /> {lastChangedAt ? `Fotograma renovado a las ${lastChangedAt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Buscando el fotograma más reciente'}</span>
       </div>
     </section>
   )
@@ -57,7 +59,6 @@ function CameraViewer({ webcam, refreshedAt }: { webcam: Webcam; refreshedAt: st
 export function BadalonaWebcamsPage({ player, sleepTimer, navigate }: BadalonaWebcamsPageProps) {
   const [webcams, setWebcams] = useState<Webcam[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [refreshedAt, setRefreshedAt] = useState('')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
@@ -73,7 +74,6 @@ export function BadalonaWebcamsPage({ player, sleepTimer, navigate }: BadalonaWe
     try {
       const directory = await getBadalonaWebcams(controller.signal)
       setWebcams(directory.webcams)
-      setRefreshedAt(directory.refreshedAt)
       setSelectedId(current => directory.webcams.some(webcam => webcam.id === current) ? current : directory.webcams[0]?.id ?? null)
     } catch (reason) {
       if (!controller.signal.aborted && !background) setError(reason instanceof Error ? reason.message : 'No pudimos cargar las cámaras ahora mismo.')
@@ -129,10 +129,10 @@ export function BadalonaWebcamsPage({ player, sleepTimer, navigate }: BadalonaWe
         {loading && <div className="mt-6 overflow-hidden rounded-2xl border border-white/[.06] bg-white/[.025]" aria-label="Cargando cámaras"><div className="aspect-video min-h-64 animate-pulse bg-white/[.04] sm:min-h-96" /><div className="h-12 animate-pulse border-t border-white/[.05]" /></div>}
         {!loading && error && <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-400/[.06] p-6 text-center"><WarningCircle size={34} className="mx-auto text-red-300" /><p className="mt-3 text-sm text-red-200">{error}</p><button onClick={() => void load()} className="mt-4 rounded-xl border border-red-300/20 px-4 py-2 text-sm font-semibold text-red-100">Reintentar</button></div>}
         {!loading && !error && !selected && <p className="mt-6 rounded-2xl border border-white/[.07] p-6 text-zinc-500">Windy no ha devuelto cámaras activas dentro del radio seleccionado.</p>}
-        {!loading && !error && selected && <div className="mt-6"><CameraViewer webcam={selected} refreshedAt={refreshedAt} /></div>}
+        {!loading && !error && selected && <div className="mt-6"><CameraViewer webcam={selected} /></div>}
 
         <section className="mt-8 grid gap-4 border-t border-white/[.06] pt-8 md:grid-cols-2">
-          <div><h2 className="font-bold">Cómo funciona esta vista</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Windy facilita imágenes recientes, no un flujo de vídeo continuo. Vibe Radio aplica una animación suave y renueva los enlaces firmados cada ocho minutos para evitar su caducidad.</p></div>
+          <div><h2 className="font-bold">Cómo funciona esta vista</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Windy facilita fotogramas recientes, no un flujo de vídeo continuo. Vibe Radio busca una imagen nueva cada 30 segundos, muestra el cambio con una transición suave y renueva los enlaces cada ocho minutos.</p></div>
           <div><h2 className="font-bold">Fuente y disponibilidad</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Las imágenes y su disponibilidad dependen de cada operador. Cámaras proporcionadas por <a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer" className="text-lime-300 hover:text-lime-200">Windy.com</a> · <a href="https://www.windy.com/webcams/add" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white">Añadir una cámara</a>.</p></div>
         </section>
       </main>

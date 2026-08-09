@@ -24,4 +24,5 @@ export type WebcamDirectory = {
 }
 
 export const BADALONA_WEBCAMS_PATH = '/camaras/badalona'
+export const WEBCAM_FRAME_REFRESH_INTERVAL = 30 * 1_000
 export const WEBCAM_REFRESH_INTERVAL = 8 * 60 * 1_000
