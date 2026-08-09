@@ -179,7 +179,7 @@ export function BadalonaWebcamsPage({ player, sleepTimer, navigate }: BadalonaWe
         {!loading && !error && selected && <div className="mt-6"><CameraViewer webcam={selected} /></div>}
 
         <section className="mt-8 grid gap-4 border-t border-white/[.06] pt-8 md:grid-cols-2">
-          <div><h2 className="font-bold">Cómo funciona esta vista</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Windy facilita fotogramas recientes, no un flujo de vídeo continuo. Vibe Radio busca una imagen nueva cada 30 segundos, muestra el cambio con una transición suave y renueva los enlaces cada ocho minutos.</p></div>
+          <div><h2 className="font-bold">Cómo funciona esta vista</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Windy facilita fotogramas recientes, no un flujo de vídeo continuo. Vibe Radio respeta el intervalo de caché indicado por Windy, muestra cada cambio real con una transición suave y renueva periódicamente los enlaces temporales.</p></div>
           <div><h2 className="font-bold">Fuente y disponibilidad</h2><p className="mt-2 text-sm leading-6 text-zinc-500">Las imágenes y su disponibilidad dependen de cada operador. Cámaras proporcionadas por <a href="https://www.windy.com/" target="_blank" rel="noopener noreferrer" className="text-lime-300 hover:text-lime-200">Windy.com</a> · <a href="https://www.windy.com/webcams/add" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white">Añadir una cámara</a>.</p></div>
         </section>
       </main>

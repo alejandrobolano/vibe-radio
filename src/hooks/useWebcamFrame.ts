@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { WEBCAM_FRAME_REFRESH_INTERVAL } from '../domain/webcam'
+
+const DEFAULT_REFRESH_DELAY = 150_000
+const MINIMUM_REFRESH_DELAY = 30_000
+const MAXIMUM_REFRESH_DELAY = 5 * 60_000
+
+function refreshDelay(cacheControl: string | null) {
+  const seconds = Number(cacheControl?.match(/max-age=(\d+)/i)?.[1])
+  if (!Number.isFinite(seconds) || seconds <= 0) return DEFAULT_REFRESH_DELAY
+  return Math.min(MAXIMUM_REFRESH_DELAY, Math.max(MINIMUM_REFRESH_DELAY, seconds * 1_000))
+}
 
 async function fingerprint(buffer: ArrayBuffer) {
   const digest = await crypto.subtle.digest('SHA-256', buffer)
@@ -18,6 +27,7 @@ export function useWebcamFrame(sourceUrl: string) {
     let inFlight = false
     let currentFingerprint = ''
     let objectUrl = ''
+    let timeout: number | undefined
 
     setFrameUrl(sourceUrl)
     setFrameRevision(0)
@@ -27,9 +37,11 @@ export function useWebcamFrame(sourceUrl: string) {
       if (inFlight) return
       inFlight = true
       setChecking(true)
+      let nextDelay = DEFAULT_REFRESH_DELAY
 
       try {
         const response = await fetch(sourceUrl, { cache: 'no-store', signal: controller.signal })
+        nextDelay = refreshDelay(response.headers.get('cache-control'))
         const contentType = response.headers.get('content-type') || ''
         if (!response.ok || !contentType.startsWith('image/')) return
 
@@ -48,17 +60,19 @@ export function useWebcamFrame(sourceUrl: string) {
         if (reason instanceof DOMException && reason.name === 'AbortError') return
       } finally {
         inFlight = false
-        if (active) setChecking(false)
+        if (active) {
+          setChecking(false)
+          timeout = window.setTimeout(() => void refresh(), nextDelay)
+        }
       }
     }
 
     void refresh()
-    const interval = window.setInterval(() => void refresh(), WEBCAM_FRAME_REFRESH_INTERVAL)
 
     return () => {
       active = false
       controller.abort()
-      window.clearInterval(interval)
+      if (timeout !== undefined) window.clearTimeout(timeout)
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
   }, [sourceUrl])
