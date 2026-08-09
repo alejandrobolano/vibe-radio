@@ -57,7 +57,7 @@ function WebcamDetails({ webcam }: { webcam: Webcam }) {
       </dl>
       {webcam.categories.length > 0 && <div className="mt-6 flex flex-wrap items-center gap-2"><Tag size={16} className="text-zinc-600" />{webcam.categories.map(category => <span key={category} className="rounded-full bg-white/[.05] px-3 py-1 text-xs text-zinc-400">{category}</span>)}</div>}
       <div className="mt-6 flex flex-wrap gap-3 border-t border-white/[.06] pt-5 text-sm">
-        {webcam.detailUrl && <a href={webcam.detailUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-semibold text-lime-300 hover:text-lime-200"><Globe size={17} /> Ficha y proveedor en Windy</a>}
+        {webcam.detailUrl && <a href={webcam.detailUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 font-semibold text-lime-300 hover:text-lime-200"><Globe size={17} /> Ficha original en Windy</a>}
         {webcam.editUrl && <a href={webcam.editUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-zinc-500 hover:text-zinc-300"><LinkSimple size={17} /> Actualizar información</a>}
       </div>
     </section>
