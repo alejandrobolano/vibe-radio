@@ -37,10 +37,12 @@ export function useRadioPlayer() {
   const [volume, setVolumeState] = useState(storedPlayer.volume)
   const [track, setTrack] = useState<TrackMetadata | null>(null)
   const [history, setHistory] = useState<TrackMetadata[]>([])
+  const [activeSourceUrl, setActiveSourceUrl] = useState(storedPlayer.station?.url_resolved ?? '')
   const audioRef = useRef<HTMLAudioElement>(null)
   const currentRef = useRef(current)
   const volumeRef = useRef(volume)
   const playbackIntentRef = useRef(false)
+  const activeSourceUrlRef = useRef(activeSourceUrl)
   const reconnectAttemptsRef = useRef(0)
   const reconnectTimerRef = useRef<number | null>(null)
 
@@ -115,7 +117,7 @@ export function useRadioPlayer() {
       setPlaying(false)
       setLoading(true)
       setError(`Reconectando con la emisora (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})…`)
-      audio.src = station.url_resolved
+      audio.src = activeSourceUrlRef.current || station.url_resolved
       audio.load()
 
       try {
@@ -191,19 +193,21 @@ export function useRadioPlayer() {
     }
   }, [clearReconnectTimer])
 
-  const playStation = async (station: Station) => {
+  const playStation = async (station: Station, sourceUrl = station.url_resolved) => {
     const audio = audioRef.current
     if (!audio) return
     clearReconnectTimer()
     playbackIntentRef.current = true
     reconnectAttemptsRef.current = 0
     currentRef.current = station
+    activeSourceUrlRef.current = sourceUrl
     setCurrent(station)
+    setActiveSourceUrl(sourceUrl)
     setTrack(null)
     setHistory([])
     setError('')
     setLoading(true)
-    audio.src = station.url_resolved
+    audio.src = sourceUrl
     audio.volume = volumeRef.current
 
     try {
@@ -242,7 +246,7 @@ export function useRadioPlayer() {
     playbackIntentRef.current = true
     setError('')
     setLoading(true)
-    if (!audio.src) audio.src = station.url_resolved
+    if (!audio.src) audio.src = activeSourceUrlRef.current || station.url_resolved
 
     try {
       await audio.play()
@@ -268,6 +272,7 @@ export function useRadioPlayer() {
     volume,
     track,
     history,
+    activeSourceUrl,
     playStation,
     pausePlayback,
     togglePlayback,
