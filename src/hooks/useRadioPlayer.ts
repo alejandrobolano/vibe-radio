@@ -8,6 +8,8 @@ const PLAYER_STORAGE_KEY = 'vibe-radio:player'
 const DEFAULT_VOLUME = 0.75
 const MAX_RECONNECT_ATTEMPTS = 4
 const RECONNECT_DELAYS_MS = [2_000, 5_000, 10_000, 20_000]
+const WAITING_GRACE_PERIOD_MS = 15_000
+const STALLED_GRACE_PERIOD_MS = 12_000
 
 type StoredPlayer = {
   station: Station | null
@@ -95,6 +97,13 @@ export function useRadioPlayer() {
       reconnectTimerRef.current = null
       const station = currentRef.current
       if (!station || !playbackIntentRef.current) return
+      if (!audio.paused && audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        reconnectAttemptsRef.current = 0
+        setPlaying(true)
+        setLoading(false)
+        setError('')
+        return
+      }
       if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
         setPlaying(false)
         setLoading(false)
@@ -139,9 +148,9 @@ export function useRadioPlayer() {
     const onWaiting = () => {
       if (!playbackIntentRef.current) return
       setLoading(true)
-      scheduleReconnect(8_000)
+      scheduleReconnect(WAITING_GRACE_PERIOD_MS)
     }
-    const onStalled = () => scheduleReconnect(5_000)
+    const onStalled = () => scheduleReconnect(STALLED_GRACE_PERIOD_MS)
     const onEnded = () => scheduleReconnect()
     const onOffline = () => {
       clearReconnectTimer()
