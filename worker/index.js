@@ -2,6 +2,7 @@ import { createCityHubSeo, createCitySeo, createCountrySeo, createInfoSeo, creat
 import { handleNowPlayingRequest } from './nowPlaying.js'
 import { handleWeatherRequest } from './weather.js'
 import { handleBadalonaWebcamsRequest } from './webcams.js'
+import { createProbeNotFoundResponse, isMaliciousProbePath } from './security.js'
 
 const WORKERS_DEV_SUFFIX = '.workers.dev'
 const PRODUCTION_HOSTNAME = 'viberadio.net'
@@ -107,6 +108,8 @@ export default {
     const url = new URL(request.url)
     const hostname = url.hostname
     const isDevelopment = hostname === DEVELOPMENT_HOSTNAME || hostname.endsWith(WORKERS_DEV_SUFFIX)
+
+    if (isMaliciousProbePath(url.pathname)) return createProbeNotFoundResponse()
 
     if (hostname === WWW_HOSTNAME) {
       const destination = new URL(url.pathname + url.search, `https://${PRODUCTION_HOSTNAME}`)
